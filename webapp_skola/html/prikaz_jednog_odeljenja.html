@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
+        </script>
+
+    <script>
+
+        let V = '---odeljenje---';
+
+        $(document).ready(() => {
+            $.get(`/jednoodeljenje?getDataForOdlj=${V}`, (data) => {
+                console.log('uso u ovoo')
+                let staresina, predmet;
+                let htmlTableOdlj = "<table align='center'><tr><th>ID</th><th>Ime</th><th>Prezime</th></tr>"
+                data.djaci.forEach(element => {
+                    htmlTableOdlj += "<tr><td>" + element.ID
+                        + "</td><td>" + element.djIme
+                        + "</td><td>" + element.Prezime
+                        + "</td></tr>";
+                    staresina = element.Ime;
+                    predmet = element.pNaziv;
+                });
+                htmlTableOdlj += "</table>";
+                document.getElementById('table').innerHTML = htmlTableOdlj;
+
+                document.getElementById('StaresinaInfo').innerHTML = `Razredni Starešina: <b>${staresina}</b> (${predmet})`;
+
+                document.getElementById('title').innerHTML = `Odeljenje V-${V}`;
+            });
+        })
+
+        
+    </script>
+
+    <style>
+        :root {
+            --color-dark: #50C878;
+            --color-mid: #66cf89;
+            --color-light: #d3f1dd;
+            --btn-shadow: rgba(80, 200, 120, 0.5);
+        }
+    </style>
+
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+
+    <div class="title" id="title"></div>
+
+    <div style="padding: 50px;">
+        <div id="table"></div>
+    </div>
+
+    <p class="p-staresina" id="StaresinaInfo"></p>
+
+    <div class="center">
+        <a href="/svaodeljenja?odlj=page">
+            <button class="button">NAZAD</button>
+        </a>
+    </div>
+
+</body>
+
+</html>

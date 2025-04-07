@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>djaci</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
+        </script>
+
+    <script>
+        $(document).ready(() => {
+            $.get("/djaci?json=1", (data) => {
+
+                let htmlTable = "<table align='center'><tr><th>ID</th><th>Ime</th><th>Prezime</th><th>Odeljenje</th><th></th></tr>"; //prvi red tabele (table headers)
+                let nizOdeljenja = []; // sva odeljenja ce biti ovde
+                data.forEach((element) => {
+                    // popunjavanje tabele
+                    htmlTable += "<tr id='tableRow'><td>" + element.ID
+                        + "</td><td>" + element.Ime
+                        + "</td><td>" + element.Prezime
+                        + "</td><td>" + element.Naziv + "</td><td class='icon-td'>"
+                        + `<a href="javascript:updateDjak('${element.ID}','${element.Ime}', '${element.Prezime}', '${element.Naziv}')">`
+                        + `<img src="/images/img-edit.png" id="img-edit" class="icon"></a>`
+                        + `<a href="javascript:deleteDjak('${element.ID}','${element.Ime}', '${element.Prezime}', '${element.Naziv}')">`
+                        + `<img src="/images/img-delete.png" id="img-delete" class="icon"></a>`
+                        + "</td></tr>";
+
+                    // dodavanje odeljenja u niz
+                    let vecDodato = false;
+                    for (let i = 0; i < nizOdeljenja.length; i++) {
+                        if (element.Naziv === nizOdeljenja[i]) vecDodato = true;
+                    }
+                    if (!vecDodato) nizOdeljenja.push(element.Naziv);
+                });
+                htmlTable += "</table>";
+                document.getElementById('table-djak').innerHTML = htmlTable; // tabela
+
+                // dodavanje opcija za odeljenja u formu za update
+                let selectOdljHTML = '';
+                for (let i = 1; i <= nizOdeljenja.length; i++) {
+                    selectOdljHTML += `<option id="option-odeljenje-${i}" value="${i}">${nizOdeljenja[i - 1]}</option>`;
+                }
+                document.getElementById('update-selection').innerHTML = selectOdljHTML;
+                document.getElementById('insert-selection').innerHTML = '<option selected disabled>ODELJENJE</option>' + selectOdljHTML;
+            })
+        });
+
+        function showInsertForm() {
+            // prikazivanje forme
+            document.getElementById('insert-form').hidden = false;
+            // sakrivanje + dugmeta
+            document.getElementById('img-plus').hidden = true;
+        }
+
+        function insertDjak() {
+            // uzimanje podataka o novom djaku
+            const ime = document.getElementById('insert-djak-ime').value;
+            const prezime = document.getElementById('insert-djak-prezime').value;
+            const odeljenje = document.getElementById('insert-selection').value;
+            // slanje zahteva
+            fetch('/insertdjak', {
+                method: 'POST',
+                body: JSON.stringify({
+                    ime: `${ime}`,
+                    prezime: `${prezime}`,
+                    odeljenje: `${odeljenje}`
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then((data) => {
+                if (data.ok) {
+                    location.reload();
+                }
+            });
+        }
+
+        function updateDjak(id, ime, prezime, odlj) {
+            // prikazivanje forme
+            document.getElementById('update-form').hidden = false;
+            // sakrivanje svega ostalog
+            document.getElementById('img-plus').hidden = true;
+            document.getElementById('insert-form').hidden = true;
+            // postavljanje vrednosti
+            document.getElementById('djak-id').value = id;
+            document.getElementById('edit-djak-ime').value = ime;
+            document.getElementById('edit-djak-prezime').value = prezime;
+            // odredjivanje selektovanog odeljenja
+            document.getElementById(`option-odeljenje-${odlj[2]}`).selected = true;
+        }
+
+        function deleteDjak(id, ime, prezime, odlj) {
+            // popup za uverenje o brisanju
+            if (confirm(`Ispisati djaka: ${ime} ${prezime} (${odlj}) ?`)) {
+                fetch('/deletedjak/' + id, {
+                    method: 'DELETE'
+                }).then((data) => {
+                    if (data.ok) {
+                        // obavestenje o brisanju
+                        console.log('djak ispisan');
+                        alert(`${ime} ${prezime} ispisan/a.`);
+                        location.reload();
+                    } else {
+                        alert('Greska pri ispisivanju djaka');
+                    }
+                })
+            }
+        }
+
+        function nazad() {
+            const insertForm = document.getElementById('insert-form');
+            const updateForm = document.getElementById('update-form');
+            const plusBtn = document.getElementById('img-plus');
+            if (insertForm.hidden === false || updateForm.hidden === false) {
+                insertForm.hidden = true;
+                updateForm.hidden = true;
+                plusBtn.hidden = false;
+            } else {
+                location.replace('/')
+            }
+        }
+
+    </script>
+
+    <style>
+        :root {
+            --color-dark: #e95c52;
+            --color-mid: #ec7068;
+            --color-light: #f7c2be;
+            --btn-shadow: rgba(233, 92, 82, 0.5);
+        }
+    </style>
+
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+
+    <div class="title">Lista svih djaka</div>
+
+    <div style="padding: 50px;">
+        <div id="table-djak"></div>
+
+        <div class="center">
+            <a href="javascript:showInsertForm()">
+                <img src="/images/img-plus.png" id="img-plus" style="height: 60px; margin-top: 5px;">
+            </a>
+        </div>
+
+        <div class="form-container" id="insert-form" hidden>
+            <form action="javascript:insertDjak()">
+                <label for="ime" class="label">Ime:</label>
+                <input type="text" name="ime" id="insert-djak-ime" class="txtField">
+
+                <label for="prezime" class="label">Prezime:</label>
+                <input type="text" name="prezime" id="insert-djak-prezime" class="txtField">
+
+                <select name="odeljenje" class="selection" id="insert-selection"
+                    style="float: left; margin-left: 15px;"></select>
+
+                <input type="submit" class="button" style="width: 100px; margin-top: 15px;">
+            </form>
+        </div>
+
+        <div class="form-container" id="update-form" hidden>
+            <form action="/updatedjak" method="POST">
+                <input type="hidden" name="djakID" id="djak-id">
+
+                <label for="ime" class="label">Ime:</label>
+                <input type="text" name="ime" class="txtField" id="edit-djak-ime" value="">
+
+                <label for="prezime" class="label">Prezime:</label>
+                <input type="text" name="prezime" class="txtField" id="edit-djak-prezime" value="">
+
+                <select name="odeljenje" class="selection" id="update-selection"
+                    style="float: left; margin-left: 15px;"></select>
+
+                <input type="submit" class="button" style="width: 100px; margin-top: 15px;">
+            </form>
+        </div>
+
+    </div>
+
+    <div class="center">
+        <button class="button" onclick="nazad()">NAZAD</button>
+    </div>
+
+</body>
+
+</html>

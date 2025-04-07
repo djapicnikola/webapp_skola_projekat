@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    background-color: #FAF9F6;
+}
+
+.center {
+    text-align: center;
+}
+
+.title {
+    width: 100%;
+    padding: 25px 0;
+    color: #FAF9F6;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 50px;
+    background-color: black;
+}
+
+.button {
+    border: none;
+    width: 100%;
+    padding: 10px;
+    background-color: #FAF9F6;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 20px;
+    transition-duration: 0.5s;
+}
+
+.red:hover {
+    background-color: #FA5F55;
+    color: #FAF9F6;
+}
+
+.blue:hover {
+    background-color: #6495ED;
+    color: #FAF9F6;
+}
+
+.green:hover {
+    background-color: #50C878;
+    color: #FAF9F6;
+}
+
+.yellow:hover {
+    background-color: #F4BB44;
+    color: #FAF9F6;
+}

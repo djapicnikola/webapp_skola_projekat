@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>predmeti</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
+        </script>
+
+    <script>
+
+        $(document).ready(() => {
+            $.get("/predmetidata", (data) => {
+
+                let htmlTable = "<table align='center'><tr><th>ID</th><th>Naziv</th></tr>"
+                data.forEach(element => {
+                    htmlTable += "<tr><td>" + element.ID
+                        + "</td><td>" + element.Naziv
+                        + "</td></tr>";
+                });
+                htmlTable += "</table>";
+                document.getElementById('table-predmet').innerHTML = htmlTable;
+
+            })
+        });
+
+    </script>
+
+    <style>
+        :root {
+            --color-dark: #f5c35b;
+            --color-mid: #f6cb70;
+            --color-light: #fbe5b9;
+            --btn-shadow: rgba(245, 195, 91, 0.5);
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+
+    <div class="title">Lista svih predmeta</div>
+
+    <div style="padding: 50px;">
+        <div id="table-predmet"></div>
+    </div>
+
+    <div class="center">
+        <a href="/">
+            <button class="button">NAZAD</button>
+        </a>
+    </div>
+
+</body>
+
+</html>
