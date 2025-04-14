@@ -3,6 +3,7 @@ const mysql2 = require('mysql2');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require("fs");
+const queries = require("./queries.js");
 
 // express server
 const app = express();
@@ -30,6 +31,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'html/index.html'));
 });
 
+// import("./queries.mjs").then(module => {
+//     const tableDjakQuery = module.tableDjakQuery;
+// })
 app.get('/djaci', (req, res) => {
 
     const {
@@ -41,13 +45,7 @@ app.get('/djaci', (req, res) => {
         res.sendFile(path.join(__dirname, 'html/lista_djaka.html'));
     } else {
         //podaci za tabelu
-        let str = 'SELECT djak.ID, djak.Ime, djak.Prezime, odeljenje.Naziv ';
-        str += 'FROM djak ';
-        str += 'INNER JOIN odeljenje ';
-        str += 'ON djak.Odeljenje = odeljenje.ID ';
-        str += 'ORDER BY djak.ID';
-
-        connection.query(str, (err, rows) => {
+        connection.query(queries.tableDjakQuery, (err, rows) => {
             if (err) {
                 console.log('Greska upita djaci');
                 throw err;
@@ -60,13 +58,7 @@ app.get('/djaci', (req, res) => {
 
 app.get('/nastavnicidata', (req, res) => {
 
-    let str = 'SELECT nastavnik.ID, nastavnik.Ime, predmet.Naziv ';
-    str += 'FROM nastavnik ';
-    str += 'INNER JOIN predmet ';
-    str += 'ON nastavnik.Predmet = predmet.ID ';
-    str += 'ORDER BY nastavnik.ID';
-
-    connection.query(str, (err, rows, fields) => {
+    connection.query(queries.tableNastavnikQuery, (err, rows, fields) => {
         if (err) {
             console.log('Greska upita nastavnici');
             throw err;
@@ -87,13 +79,7 @@ app.get('/svaodeljenja', (req, res) => {
         res.sendFile(path.join(__dirname, 'html/lista_odeljenja.html'));
     } else {
         //podaci za tabelu
-        let str = 'SELECT odeljenje.ID, nastavnik.Ime, odeljenje.Naziv ';
-        str += 'FROM odeljenje ';
-        str += 'INNER JOIN nastavnik ';
-        str += 'ON odeljenje.Staresina = nastavnik.ID ';
-        str += 'ORDER BY odeljenje.ID';
-
-        connection.query(str, (err, rows) => {
+        connection.query(queries.svaOdeljenjaQuery, (err, rows) => {
             if (err) {
                 console.log('Greska upita odeljenja');
                 throw err;
@@ -115,13 +101,7 @@ app.get('/jednoodeljenje', (req, res) => {
         res.send(fs.readFileSync("html/prikaz_jednog_odeljenja.html").toString().replace("---odeljenje---", V));
     } else if (!V && getDataForOdlj) {
         //podaci za tabelu
-        let str = `SELECT djak.ID, djak.Ime as djIme, djak.Prezime, nastavnik.Ime, predmet.Naziv as pNaziv, odeljenje.Naziv `;
-        str += `FROM djak INNER JOIN odeljenje ON djak.Odeljenje = odeljenje.ID `;
-        str += `INNER JOIN nastavnik ON odeljenje.Staresina = nastavnik.ID `;
-        str += `INNER JOIN predmet ON nastavnik.Predmet = predmet.ID `;
-        str += `WHERE djak.Odeljenje = ${getDataForOdlj}`;
-
-        connection.query(str, (err, rows) => {
+        connection.query(queries.jednoOdeljenjeQuery, [getDataForOdlj], (err, rows) => {
             if (err) {
                 console.log('Greska upita odlj');
                 throw err;
@@ -147,8 +127,6 @@ app.get('/predmetidata', (req, res) => {
     });
 
 });
-
-// Manipulating data
 
 app.post('/insertdjak', (req, res) => {
 
@@ -210,7 +188,6 @@ app.delete('/deletedjak/:id', (req, res) => {
     res.send();
 })
 
-///
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
